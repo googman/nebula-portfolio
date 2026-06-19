@@ -1,6 +1,13 @@
-const SUPABASE_URL = process.env.SUPABASE_URL;
-const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const SUPABASE_URL = cleanSupabaseUrl(process.env.SUPABASE_URL);
+const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim();
 const table = "works";
+
+function cleanSupabaseUrl(value = "") {
+  return value
+    .trim()
+    .replace(/\/rest\/v1\/?$/i, "")
+    .replace(/\/+$/, "");
+}
 
 function sendJson(response, status, payload) {
   response.statusCode = status;
@@ -52,16 +59,22 @@ function normalizeWork(input, existing = {}) {
 
 async function supabase(path, init = {}) {
   assertConfig();
-  const response = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
-    ...init,
-    headers: {
-      apikey: SUPABASE_SERVICE_ROLE_KEY,
-      Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
-      "Content-Type": "application/json",
-      Prefer: "return=representation",
-      ...(init.headers || {}),
-    },
-  });
+  const url = `${SUPABASE_URL}/rest/v1/${path}`;
+  let response;
+  try {
+    response = await fetch(url, {
+      ...init,
+      headers: {
+        apikey: SUPABASE_SERVICE_ROLE_KEY,
+        Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+        "Content-Type": "application/json",
+        Prefer: "return=representation",
+        ...(init.headers || {}),
+      },
+    });
+  } catch (error) {
+    throw new Error(`Supabase fetch failed for ${SUPABASE_URL}. Check SUPABASE_URL and Vercel Production env vars. ${error.message}`);
+  }
 
   if (!response.ok) {
     const message = await response.text();
