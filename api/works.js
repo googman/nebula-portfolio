@@ -73,7 +73,8 @@ async function supabase(path, init = {}) {
       },
     });
   } catch (error) {
-    throw new Error(`Supabase fetch failed for ${SUPABASE_URL}. Check SUPABASE_URL and Vercel Production env vars. ${error.message}`);
+    const cause = error.cause ? ` Cause: ${error.cause.code || ""} ${error.cause.message || ""}` : "";
+    throw new Error(`Supabase fetch failed for ${SUPABASE_URL}. Check SUPABASE_URL and Vercel Production env vars. ${error.message}.${cause}`);
   }
 
   if (!response.ok) {
