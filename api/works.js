@@ -84,8 +84,9 @@ export default async function handler(request, response) {
       return;
     }
 
-    const parts = request.url.split("?")[0].split("/").filter(Boolean);
-    const id = parts[1] ? decodeURIComponent(parts[1]) : "";
+    const pathname = request.url.split("?")[0];
+    const parts = pathname.split("/").filter(Boolean);
+    const id = parts[0] === "works" && parts[1] ? decodeURIComponent(parts[1]) : "";
 
     if (request.method === "GET" && !id) {
       const rows = await supabase(`${table}?select=*&order=date.asc`);

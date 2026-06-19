@@ -2,6 +2,7 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "rewrites": [
+    { "source": "/api/works", "destination": "/api/works" },
     { "source": "/api/works/(.*)", "destination": "/api/works" },
     { "source": "/(.*)", "destination": "/" }
   ]
